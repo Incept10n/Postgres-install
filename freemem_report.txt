@@ -1,0 +1,1 @@
+188.243.207.170: {'ansible_memory_mb.real.free': '512', 'failed': False, 'changed': False} MB

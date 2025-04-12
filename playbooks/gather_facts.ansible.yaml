@@ -1,0 +1,23 @@
+- name: Gather system load info
+  hosts: all
+  gather_facts: true
+  tasks:
+    - name: Ensure freemem_report.txt is empty before writing
+      delegate_to: 127.0.0.1
+      ansible.builtin.copy:
+        content: ""
+        dest: ../freemem_report.txt
+        mode: "0644"
+
+    - name: Print load average
+      ansible.builtin.debug:
+        var: ansible_memory_mb.real.free
+      register: freemem
+
+    - name: Save into the file info about free RAM from mashines
+      delegate_to: 127.0.0.1
+      ansible.builtin.lineinfile:
+        path: ../freemem_report.txt
+        create: true
+        line: "{{ inventory_hostname }}: {{ freemem }} MB"
+        mode: "0644"
