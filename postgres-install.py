@@ -6,12 +6,10 @@ def generate_inventory(ip_list):
     with open("inventory.txt", "w") as f:
         f.write("[all]\n")
         for ip in ip_list:
-            f.write(f"{ip}\n")
+            f.write(f"{ip} ansible_user=root\n")
 
-def run_ansible(playbook, limit=None):
+def run_ansible(playbook):
     cmd = ["ansible-playbook", f"./playbooks/{playbook}", "-i", "inventory.txt"]
-    if limit:
-        cmd += ["--limit", limit]
     return subprocess.run(cmd)
 
 def choose_least_load():
@@ -48,13 +46,16 @@ def main():
 
     print("Gathering facts about conjunction of services...")
 
-    # run_ansible("gather_facts.ansible.yaml")
+    run_ansible("gather_facts.ansible.yaml")
 
-    choose_least_load()
+    print("Choosing less busy host...")
+
+    leastLoadIp = choose_least_load()
+
+    print(leastLoadIp)
 
 
 
-    # print("Then less busy host will be chosen and postgress will be installed...")
 
 
 
