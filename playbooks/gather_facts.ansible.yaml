@@ -2,22 +2,38 @@
   hosts: all
   gather_facts: true
   tasks:
-    - name: Ensure freemem_report.txt is empty before writing
+    - name: Set CPU ratio
+      ansible.builtin.set_fact:
+        cpu_ratio: "{{ ansible_loadavg['1m'] / ansible_processor_vcpus }}"
+
+    - name: Set memory usage
+      ansible.builtin.set_fact:
+        mem_usage: "{{ ansible_memory_mb.real.used / ansible_memory_mb.real.total }}"
+
+    - name: Set disk usage (for root mount)
+      ansible.builtin.set_fact:
+        disk_usage: "{{ (ansible_mounts[0].size_total - ansible_mounts[0].size_available) / ansible_mounts[0].size_total }}"
+
+    - name: Set overall score
+      ansible.builtin.set_fact:
+        overall_score: "{{ (cpu_ratio | float) * 0.5 + (mem_usage | float) * 0.3 + (disk_usage | float) * 0.2 }}"
+
+    - name: Ensure load_report.txt is empty before writing
       delegate_to: 127.0.0.1
       ansible.builtin.copy:
         content: ""
-        dest: ../freemem_report.txt
+        dest: ../load_report.txt
         mode: "0644"
 
     - name: Print load average
       ansible.builtin.debug:
-        var: ansible_memory_mb.real.free
-      register: freemem
+        var: overall_score
+      register: overall_score
 
     - name: Save into the file info about free RAM from mashines
       delegate_to: 127.0.0.1
       ansible.builtin.lineinfile:
-        path: ../freemem_report.txt
+        path: ../load_report.txt
         create: true
-        line: "{{ inventory_hostname }}: {{ freemem }} MB"
+        line: "{{ inventory_hostname }}: {{ overall_score }}"
         mode: "0644"

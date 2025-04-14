@@ -6,14 +6,14 @@ def generate_inventory(ip_list):
     with open("inventory.txt", "w") as f:
         f.write("[all]\n")
         for ip in ip_list:
-            f.write(f"{ip} ansible_user=root\n")
+            f.write(f"{ip} ansible_user=root ansible_port=7730\n")
 
 def run_ansible(playbook):
     cmd = ["ansible-playbook", f"./playbooks/{playbook}", "-i", "inventory.txt"]
     return subprocess.run(cmd)
 
 def choose_least_load():
-    with open("freemem_report.txt", "r") as f:
+    with open("load_report.txt", "r") as f:
         data = {}
         for line in f.readlines():
             splitted = line.split(": ")
@@ -42,7 +42,8 @@ def main():
     parser.add_argument("hosts", nargs="+", help="Comma-separated list of IPs or hostnames")
     args = parser.parse_args()
 
-    # generate_inventory(args.hosts)
+    print(args.hosts)
+    generate_inventory(args.hosts)
 
     print("Gathering facts about conjunction of services...")
 
@@ -51,10 +52,14 @@ def main():
     print("Choosing less busy host...")
 
     leastLoadIp = choose_least_load()
+    leastLoadList = []
+    leastLoadList.append(leastLoadIp)
 
-    print(leastLoadIp)
+    generate_inventory(leastLoadList)
 
+    run_ansible("installPostgres.ansible.yaml")
 
+    
 
 
 

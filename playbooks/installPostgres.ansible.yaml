@@ -1,0 +1,6 @@
+- name: Install postgres
+  hosts: all
+  tasks:
+    - name: Using the role to install postgres
+      ansible.builtin.import_role:
+        name: installPostgres
