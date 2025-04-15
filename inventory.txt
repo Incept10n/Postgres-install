@@ -1,1 +1,2 @@
 [all]
+188.243.207.170 ansible_user=root ansible_port=7730

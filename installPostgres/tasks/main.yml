@@ -18,3 +18,24 @@
   ansible.builtin.apt:
     name: postgresql
     state: present
+
+- name: Get installed PostgreSQL version # noqa: no-changed-when
+  ansible.builtin.command: psql -V
+  register: psql_version_output
+
+- name: Set PostgreSQL version fact
+  ansible.builtin.set_fact:
+    pg_version: "{{ psql_version_output.stdout.split(' ')[2].split('.')[0] }}"
+
+- name: Listen all IP adresses
+  ansible.builtin.lineinfile:
+    path: "/etc/postgresql/{{ pg_version }}/main/postgresql.conf"
+    regexp: '^#?listen_addresses ='
+    line: "listen_addresses = '*'"
+
+- name: Add access rule to pg_hba.conf
+  ansible.builtin.lineinfile:
+    path: "/etc/postgresql/{{ pg_version }}/main/pg_hba.conf"
+    line: "host    all             all             0.0.0.0/0               md5"
+    state: present
+    insertafter: EOF
