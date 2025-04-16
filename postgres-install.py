@@ -1,6 +1,7 @@
 import argparse
 import subprocess
 import re
+import os
 
 def generate_inventory(ip_list):
     with open("inventory.txt", "w") as f:
@@ -22,15 +23,23 @@ def choose_least_load():
         dataCleaned = {}
 
         for ip, memValue in data.items():
-            digitalsMem = re.findall(r'\d+', memValue)
-            dataCleaned[ip] = int(digitalsMem[0])
+            digitalsMem = re.findall(r'0\.\d+', memValue)
+            dataCleaned[ip] = float(digitalsMem[0])
         
         sortedDict = dict(sorted(dataCleaned.items(), key=lambda item: item[1]))
 
         lessMemIp = list(sortedDict.items())[0]
+        otherIp = list(sortedDict.items())[1]
 
-        return str(lessMemIp[0])
-        
+        return str(lessMemIp[0]), str(otherIp[0])
+    
+def check_db_up(leastLoadIp):
+    env = os.environ.copy()
+    env["PGPASSWORD"] = "student"
+
+    cmd = ["psql", "-h", f"{leastLoadIp}", "-U", "student", "-d", "student", "-c", "SELECT 1;"] 
+    return subprocess.run(cmd, env=env)
+
 
 
 
@@ -50,7 +59,7 @@ def main():
 
     print("Choosing less busy host...")
 
-    leastLoadIp = choose_least_load()
+    leastLoadIp, otherIp = choose_least_load()
     leastLoadList = []
     leastLoadList.append(leastLoadIp)
 
@@ -59,6 +68,16 @@ def main():
     run_ansible("installPostgres.ansible.yaml")
 
     run_ansible("addUser.ansible.yaml")
+
+    res = check_db_up("188.243.207.170")
+
+    if(res.returncode != 0):
+        print("DATABASE NOT WORKING")
+    else:
+        print("DATABASE IS WORKING")
+
+
+
 
     
 

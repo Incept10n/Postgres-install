@@ -8,7 +8,6 @@
   community.postgresql.postgresql_user:
     name: "{{ db_user }}"
     password: "{{ db_pass }}"
-    # priv: "{{ db_name }}:ALL"
 
 - name: Create database owned by 'student'
   become_user: postgres
