@@ -1,0 +1,6 @@
+- name: Create user 'student' and grant all privileges on their database # noqa: partial-become
+  hosts: all
+  tasks:
+    - name: Include role that creates user and its database
+      ansible.builtin.import_role:
+        name: addUser

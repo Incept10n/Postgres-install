@@ -32,6 +32,8 @@
     path: "/etc/postgresql/{{ pg_version }}/main/postgresql.conf"
     regexp: '^#?listen_addresses ='
     line: "listen_addresses = '*'"
+  notify:
+    - Restart PostgreSQL
 
 - name: Add access rule to pg_hba.conf
   ansible.builtin.lineinfile:
@@ -39,3 +41,23 @@
     line: "host    all             all             0.0.0.0/0               md5"
     state: present
     insertafter: EOF
+  notify:
+    - Restart PostgreSQL
+
+- name: Add access rule to pg_hba.conf
+  ansible.builtin.lineinfile:
+    path: "/etc/postgresql/{{ pg_version }}/main/pg_hba.conf"
+    line: "local   all             all                                     md5"
+    state: present
+    insertafter: EOF
+  notify:
+    - Restart PostgreSQL
+
+- name: Add access rule to pg_hba.conf
+  ansible.builtin.lineinfile:
+    path: "/etc/postgresql/{{ pg_version }}/main/pg_hba.conf"
+    regexp: '^local\s+all\s+postgres\s+.*$'
+    line: "local   all             postgres                                     trust"
+    insertafter: EOF
+  notify:
+    - Restart PostgreSQL

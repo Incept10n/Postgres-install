@@ -1,0 +1,17 @@
+- name: Install psycopg2 via apt
+  ansible.builtin.apt:
+    name: python3-psycopg2
+    state: present
+
+- name: Create PostgreSQL user
+  become_user: postgres
+  community.postgresql.postgresql_user:
+    name: "{{ db_user }}"
+    password: "{{ db_pass }}"
+    # priv: "{{ db_name }}:ALL"
+
+- name: Create database owned by 'student'
+  become_user: postgres
+  community.postgresql.postgresql_db:
+    name: "{{ db_name }}"
+    owner: "{{ db_user }}"

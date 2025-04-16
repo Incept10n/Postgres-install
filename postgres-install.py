@@ -42,7 +42,6 @@ def main():
     parser.add_argument("hosts", nargs="+", help="Comma-separated list of IPs or hostnames")
     args = parser.parse_args()
 
-    print(args.hosts)
     generate_inventory(args.hosts)
 
     print("Gathering facts about conjunction of services...")
@@ -58,6 +57,8 @@ def main():
     generate_inventory(leastLoadList)
 
     run_ansible("installPostgres.ansible.yaml")
+
+    run_ansible("addUser.ansible.yaml")
 
     
 

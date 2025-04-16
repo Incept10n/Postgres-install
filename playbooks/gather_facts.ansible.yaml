@@ -30,7 +30,7 @@
         var: overall_score
       register: overall_score
 
-    - name: Save into the file info about free RAM from mashines
+    - name: Save into the file info about load from mashines
       delegate_to: 127.0.0.1
       ansible.builtin.lineinfile:
         path: ../load_report.txt
