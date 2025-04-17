@@ -1,0 +1,21 @@
+- name: Get installed PostgreSQL version # noqa: no-changed-when
+  ansible.builtin.command: psql -V
+  register: psql_version_output
+
+- name: Set PostgreSQL version fact
+  ansible.builtin.set_fact:
+    pg_version: "{{ psql_version_output.stdout.split(' ')[2].split('.')[0] }}"
+
+- name: Reject all student connection from other IPs
+  ansible.builtin.lineinfile:
+    path: "/etc/postgresql/{{ pg_version }}/main/pg_hba.conf"
+    insertafter: '^# IPv4 local connections:'
+    line: 'host all student 0.0.0.0/0 reject'
+  notify: Restart PostgreSQL
+
+- name: Allow connection only from one ip
+  ansible.builtin.lineinfile:
+    path: "/etc/postgresql/{{ pg_version }}/main/pg_hba.conf"
+    insertafter: '^# IPv4 local connections:'
+    line: 'host all student {{ ip }} md5'
+  notify: Restart PostgreSQL

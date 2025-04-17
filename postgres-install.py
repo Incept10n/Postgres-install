@@ -40,6 +40,11 @@ def check_db_up(leastLoadIp):
     cmd = ["psql", "-h", f"{leastLoadIp}", "-U", "student", "-d", "student", "-c", "SELECT 1;"] 
     return subprocess.run(cmd, env=env)
 
+def change_vars_for_secondIp(secondIp):
+    with open("./studentAccess/vars/main.yml", "w") as f:
+        f.write(f"ip: {secondIp}/32\n")
+
+
 
 
 
@@ -51,11 +56,11 @@ def main():
     parser.add_argument("hosts", nargs="+", help="Comma-separated list of IPs or hostnames")
     args = parser.parse_args()
 
-    generate_inventory(args.hosts)
+    # generate_inventory(args.hosts)
 
     print("Gathering facts about conjunction of services...")
 
-    run_ansible("gather_facts.ansible.yaml")
+    # run_ansible("gather_facts.ansible.yaml")
 
     print("Choosing less busy host...")
 
@@ -69,14 +74,17 @@ def main():
 
     run_ansible("addUser.ansible.yaml")
 
-    res = check_db_up("188.243.207.170")
+    res = check_db_up(leastLoadIp)
 
     if(res.returncode != 0):
         print("DATABASE NOT WORKING")
+        exit(1)
     else:
         print("DATABASE IS WORKING")
 
+    change_vars_for_secondIp(otherIp)
 
+    run_ansible("studentAccess.ansible.yaml")
 
 
     

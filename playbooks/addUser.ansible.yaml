@@ -1,4 +1,4 @@
-- name: Create user 'student' and grant all privileges on their database # noqa: partial-become
+- name: Create user 'student' # noqa: partial-become
   hosts: all
   tasks:
     - name: Include role that creates user and its database

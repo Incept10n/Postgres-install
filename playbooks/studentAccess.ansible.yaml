@@ -1,0 +1,6 @@
+- name: Set connection access for student from other server
+  hosts: all
+  tasks:
+    - name: Make student user connection to DB only from second server
+      ansible.builtin.import_role:
+        name: studentAccess
