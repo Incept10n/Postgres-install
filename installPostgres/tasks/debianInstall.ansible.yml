@@ -35,6 +35,14 @@
   notify:
     - Restart PostgreSQL
 
+- name: Listen 5432 port
+  ansible.builtin.lineinfile:
+    path: "/etc/postgresql/{{ pg_version }}/main/postgresql.conf"
+    regexp: '^#?port ='
+    line: "port = 5432"
+  notify:
+    - Restart PostgreSQL
+
 - name: Add access rule to pg_hba.conf
   ansible.builtin.lineinfile:
     path: "/etc/postgresql/{{ pg_version }}/main/pg_hba.conf"
@@ -56,8 +64,8 @@
 - name: Add access rule to pg_hba.conf
   ansible.builtin.lineinfile:
     path: "/etc/postgresql/{{ pg_version }}/main/pg_hba.conf"
-    regexp: '^local\s+all\s+postgres\s+.*$'
+    regexp: '^local\s+all\s+all\s+peer.*$'
     line: "local   all             postgres                                     trust"
-    insertafter: EOF
+    state: present
   notify:
     - Restart PostgreSQL
