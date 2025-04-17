@@ -1,0 +1,9 @@
+- name: Install postgress for Debian
+  ansible.builtin.import_tasks:
+    file: ./debianInstall.ansible.yml
+  when: ansible_os_family == "Debian"
+
+- name: Install postgres for RedHat
+  ansible.builtin.import_tasks:
+    file: ./redHatInstall.ansible.yml
+  when: ansible_os_family == "RedHat"

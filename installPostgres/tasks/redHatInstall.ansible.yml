@@ -1,0 +1,67 @@
+- name: Install packages
+  ansible.builtin.yum:
+    name:
+      - postgresql
+      - postgresql-server
+      - postgresql-contrib
+      - postgresql-libs
+    state: present
+
+- name: Check if PostgreSQL is initialized
+  ansible.builtin.stat:
+    path: "/var/lib/pgsql/data/pg_hba.conf"
+  register: postgres_data
+
+- name: Initialize PostgreSQL # noqa: command-instead-of-shell
+  ansible.builtin.shell: "postgresql-setup initdb"
+  when: not postgres_data.stat.exists
+  changed_when: false
+
+- name: Start and enable service
+  ansible.builtin.service:
+    name: postgresql
+    state: started
+    enabled: true
+
+- name: Get installed PostgreSQL version # noqa: no-changed-when
+  ansible.builtin.command: psql -V
+  register: psql_version_output
+
+- name: Set PostgreSQL version fact
+  ansible.builtin.set_fact:
+    pg_version: "{{ psql_version_output.stdout.split(' ')[2].split('.')[0] }}"
+
+- name: Listen on all IP addresses
+  ansible.builtin.lineinfile:
+    path: "/var/lib/pgsql/{{ pg_version }}/data/postgresql.conf"
+    regexp: '^#?listen_addresses ='
+    line: "listen_addresses = '*'"
+  notify:
+    - Restart PostgreSQL
+
+- name: Add access rule to pg_hba.conf for remote connections
+  ansible.builtin.lineinfile:
+    path: "/var/lib/pgsql/{{ pg_version }}/data/pg_hba.conf"
+    line: "host    all             all             0.0.0.0/0               md5"
+    state: present
+    insertafter: EOF
+  notify:
+    - Restart PostgreSQL
+
+- name: Add access rule to pg_hba.conf for local connections
+  ansible.builtin.lineinfile:
+    path: "/var/lib/pgsql/{{ pg_version }}/data/pg_hba.conf"
+    line: "local   all             all                                     md5"
+    state: present
+    insertafter: EOF
+  notify:
+    - Restart PostgreSQL
+
+- name: Add access rule to pg_hba.conf for postgres user
+  ansible.builtin.lineinfile:
+    path: "/var/lib/pgsql/{{ pg_version }}/data/pg_hba.conf"
+    regexp: '^local\s+all\s+postgres\s+.*$'
+    line: "local   all             postgres                                     trust"
+    insertafter: EOF
+  notify:
+    - Restart PostgreSQL
