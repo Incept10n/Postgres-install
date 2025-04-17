@@ -55,8 +55,12 @@ def main():
     parser = argparse.ArgumentParser(prog='postgres-install')
     parser.add_argument("hosts", nargs="+", help="Comma-separated list of IPs or hostnames")
     args = parser.parse_args()
+    host_list = args.hosts[0].split(",")
 
-    # generate_inventory(args.hosts)
+    if (len(args.hosts) > 1): 
+        generate_inventory(args.hosts)
+    else:
+        generate_inventory(host_list)
 
     print("Gathering facts about conjunction of services...")
 
