@@ -7,7 +7,7 @@ def generate_inventory(ip_list):
     with open("inventory.txt", "w") as f:
         f.write("[all]\n")
         for ip in ip_list:
-            f.write(f"{ip} ansible_user=root ansible_port=7731\n") # NEEDED TO BE CHANGED WITH NO PORT! DONE WITH TEST PURPOSES
+            f.write(f"{ip} ansible_user=root\n") 
 
 def run_ansible(playbook):
     cmd = ["ansible-playbook", f"./playbooks/{playbook}", "-i", "inventory.txt"]
@@ -64,7 +64,7 @@ def main():
 
     print("Gathering facts about conjunction of services...")
 
-    # run_ansible("gather_facts.ansible.yaml")
+    run_ansible("gather_facts.ansible.yaml")
 
     print("Choosing less busy host...")
 
