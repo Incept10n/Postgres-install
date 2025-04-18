@@ -1,15 +1,3 @@
-- name: Add pgdg repo to sources.list.d
-  ansible.builtin.lineinfile:
-    path: /etc/apt/sources.list.d/pgdg.list
-    line: "deb http://apt.postgresql.org/pub/repos/apt {{ ansible_distribution_release }}-pgdg main"
-    create: true
-    mode: "0644"
-
-- name: Download PostgreSQL key and add it to system keyring
-  ansible.builtin.apt_key:
-    url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
-    state: present
-
 - name: Update apt cache
   ansible.builtin.apt:
     update_cache: true
@@ -18,6 +6,7 @@
   ansible.builtin.apt:
     name: postgresql
     state: present
+    update_cache: true
 
 - name: Get installed PostgreSQL version # noqa: no-changed-when
   ansible.builtin.command: psql -V
@@ -64,7 +53,7 @@
 - name: Add access rule to pg_hba.conf
   ansible.builtin.lineinfile:
     path: "/etc/postgresql/{{ pg_version }}/main/pg_hba.conf"
-    regexp: '^local\s+all\s+all\s+peer.*$'
+    regexp: '^local\s+all\s+postgres\s+peer.*$'
     line: "local   all             postgres                                     trust"
     state: present
   notify:
