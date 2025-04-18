@@ -64,8 +64,8 @@ def main():
 
     print("Gathering facts about conjunction of services...")
 
-    # run_ansible("emptyLoadReport.ansible.yaml")
-    # run_ansible("gather_facts.ansible.yaml")
+    run_ansible("emptyLoadReport.ansible.yaml")
+    run_ansible("gather_facts.ansible.yaml")
     
 
     print("Choosing less busy host...")
