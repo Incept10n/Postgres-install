@@ -1,2 +1,0 @@
-158.160.147.195: {'overall_score': '0.48205006005596341', 'failed': False, 'changed': False}
-158.160.175.220: {'overall_score': '0.2591718570743797', 'failed': False, 'changed': False}

@@ -1,2 +1,1 @@
 [all]
-158.160.175.220 ansible_user=root
